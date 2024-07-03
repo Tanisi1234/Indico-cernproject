@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar of Events: Print to File</title>
+    <link rel="stylesheet" type="text/css" href="../static/css/generic.css">
+    <style>
+        .two-column {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+        .column {
+            width: 45%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .vertical-line {
+            border-left: 1px solid #000;
+            height: auto;
+            margin: 0 10px;
+        }
+        .event-title {
+            font-size: 1.2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .event-details {
+            font-size: 0.9em;
+            margin-bottom: 10px;
+        }
+        .event-details p {
+            margin: 5px 0;
+        }
+        .header h1, h2 {
+            text-align: center;
+        }
+        
+    </style>
+    <script>
+        function printDiv(divID) {
+            var divElements = document.getElementById(divID).innerHTML;
+            var oldPage = document.body.innerHTML;
+            document.body.innerHTML =
+                "<html><head><title></title></head><body>" + divElements + "</body>";
+            window.print();
+            document.body.innerHTML = oldPage;
+            attachListener();
+        }
+
+        function attachListener() {
+            const val = document.querySelector(".inbody");
+            const zoomin = document.querySelector(".btn.zoom-in");
+            const zoomout = document.querySelector(".btn.zoom-out");
+
+            function zoom_in() {
+                const fonsi = window
+                    .getComputedStyle(val, null)
+                    .getPropertyValue("font-size");
+                const currentSize = parseFloat(fonsi);
+                val.style.fontSize = currentSize + 1 + "px";
+            }
+
+            if (zoomin) {
+                zoomin.addEventListener("click", zoom_in);
+            }
+
+            function zoom_out() {
+                const fonsi = window
+                    .getComputedStyle(val, null)
+                    .getPropertyValue("font-size");
+                const currentSize = parseFloat(fonsi);
+                val.style.fontSize = currentSize - 1 + "px";
+            }
+
+            if (zoomout) {
+                zoomout.addEventListener("click", zoom_out);
+            }
+        }
+
+        document.addEventListener("DOMContentLoaded", attachListener);
+    </script>
+</head>
+<body>
+<div class="mainbody">
+    {% if not forPrint %}
+    <div class="titlebar">
+        <form method="post" action="/process_form">
+            Select:&nbsp;
+            <select id="viewSelect" name="view" onchange="this.form.submit()" style="font-size: 8pt">
+                <option value="generic.html" selected>Generic Notice Layout</option>
+                <option value="daa.html">DAA Notice Layout</option>
+                <option value="dbs.html">DBS Notice Layout</option>
+                <option value="dcs.html">DCS Notice Layout</option>
+                <option value="dcmp.html">DCMP Notice Layout</option>
+                <option value="dhep.html">DHEP Notice Layout</option>
+                <option value="dnap.html">DNAP Notice Layout</option>
+                <option value="dtp.html">DTP Notice Layout</option>
+                <option value="stcs.html">STCS Notice Layout</option>
+                <option value="wednesdaytalks.html">Wednesday Colloquium Notice Layout</option>
+                <option value="aset.html">ASET Colloquium Notice Layout</option>
+                <option value="testDAA.html">Demo Notice Layout</option>
+            </select>
+            | Layout View &nbsp; |
+            <input type="button" value="Print Notice" onclick="javascript:printDiv('printablediv')">
+            <button type="button" class="btn zoom-in">Increase Size</button>
+            <button type="button" class="btn zoom-out">Decrease Size</button>
+            <br>
+            <label for="category_number">Category Number:</label>
+            <input type="text" id="category_number" name="category_number" required><br>
+
+            <label for="start_date">Start Date:</label>
+            <input type="date" id="start_date" name="start_date" required><br>
+
+            <label for="end_date">End Date:</label>
+            <input type="date" id="end_date" name="end_date" required><br>
+
+            <input type="submit" value="Fetch Events">
+        </form>
+    </div>
+    {% endif %}
+    <div id="printablediv">
+        <div class="inbody">
+            <div class="header">
+                <h1>टाटा मूलभूत अनुसंधान संस्थान<br />Tata Institute of Fundamental Research</h1>
+            </div>
+            <hr />
+            <h2>Generic Colloquium</h2>
+            {% if events_data %}
+                <ul>
+                    {% for event in events_data %}
+                        <li>
+                            <h3 class="event-title">{{ event.Title }}</h3>
+                            <div class="event-details">
+                                <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
+                                <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
+                                <p><strong>Location:</strong> {{ event.Location }}</p>
+                                <p><a href="{{ event.URL }}">More Info</a></p>
+                            </div>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+            <div class="two-column">
+                <div class="column">
+                    <h2>Conferences</h2>
+                    {% if conference_events %}
+                        <ul>
+                            
+                            {% for event in conference_events %}
+                                <li>
+                                    <h3 class="event-title">{{ event.Title }}</h3>
+                                    <div class="event-details">
+                                        <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
+                                        <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
+                                        <p><strong>Location:</strong> {{ event.Location }}</p>
+                                        <p><a href="{{ event.URL }}">More Info</a></p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        
+                    {% endif %}
+                </div>
+                <div class="vertical-line"></div>
+                <div class="column">
+                    <h2>Seminars</h2>
+                    {% if seminar_events %}
+                        <ul>
+                            {% for event in seminar_events %}
+                                <li>
+                                    <h3 class="event-title">{{ event.Title }}</h3>
+                                    <div class="event-details">
+                                        <h2>No Seminars </h2>
+                                        <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
+                                        <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
+                                        <p><strong>Location:</strong> {{ event.Location }}</p>
+                                        <p><strong>Description:</strong> {{ event.Description }}</p>
+                                        <p><a href="{{ event.URL }}">More Info</a></p>
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                       
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
