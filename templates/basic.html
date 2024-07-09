@@ -39,7 +39,6 @@
         .header h1, h2 {
             text-align: center;
         }
-        
     </style>
     <script>
         function printDiv(divID) {
@@ -86,43 +85,26 @@
     </script>
 </head>
 <body>
-<div class="mainbody">
-    {% if not forPrint %}
-    <div class="titlebar">
-        <form method="post" action="/process_form">
-            Select:&nbsp;
-            <select id="viewSelect" name="view" onchange="this.form.submit()" style="font-size: 8pt">
-                <option value="generic.html" selected>Generic Notice Layout</option>
-                <option value="daa.html">DAA Notice Layout</option>
-                <option value="dbs.html">DBS Notice Layout</option>
-                <option value="dcs.html">DCS Notice Layout</option>
-                <option value="dcmp.html">DCMP Notice Layout</option>
-                <option value="dhep.html">DHEP Notice Layout</option>
-                <option value="dnap.html">DNAP Notice Layout</option>
-                <option value="dtp.html">DTP Notice Layout</option>
-                <option value="stcs.html">STCS Notice Layout</option>
-                <option value="wednesdaytalks.html">Wednesday Colloquium Notice Layout</option>
-                <option value="aset.html">ASET Colloquium Notice Layout</option>
-                <option value="testDAA.html">Demo Notice Layout</option>
-            </select>
-            | Layout View &nbsp; |
-            <input type="button" value="Print Notice" onclick="javascript:printDiv('printablediv')">
-            <button type="button" class="btn zoom-in">Increase Size</button>
-            <button type="button" class="btn zoom-out">Decrease Size</button>
-            <br>
-            <label for="category_number">Category Number:</label>
-            <input type="text" id="category_number" name="category_number" required><br>
+    <div class="mainbody">
+        {% if not forPrint %}
+        <div class="titlebar">
+            <form method="post" action="/print_form">
+                <label for="category_number">Category Number:</label>
+                <input type="text" id="category_number" name="category_number" required><br>
 
-            <label for="start_date">Start Date:</label>
-            <input type="date" id="start_date" name="start_date" required><br>
+                <label for="start_date">Start Date:</label>
+                <input type="date" id="start_date" name="start_date" required><br>
 
-            <label for="end_date">End Date:</label>
-            <input type="date" id="end_date" name="end_date" required><br>
+                <label for="end_date">End Date:</label>
+                <input type="date" id="end_date" name="end_date" required><br>
 
-            <input type="submit" value="Fetch Events">
-        </form>
+                <input type="hidden" name="view" value="generic.html">
+                
+                <input type="submit" name="search" value="Fetch Events">
+            </form>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
     <div id="printablediv">
         <div class="inbody">
             <div class="header">
@@ -139,6 +121,7 @@
                                 <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
                                 <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
                                 <p><strong>Location:</strong> {{ event.Location }}</p>
+                                <p><strong>Category Number:</strong> {{ event["category_number"] }}</p>
                                 <p><a href="{{ event.URL }}">More Info</a></p>
                             </div>
                         </li>
@@ -147,52 +130,68 @@
             {% endif %}
             <div class="two-column">
                 <div class="column">
-                    <h2>Conferences</h2>
+                    <h2> Upcoming Conferences</h2>
                     {% if conference_events %}
                         <ul>
-                            
                             {% for event in conference_events %}
                                 <li>
-                                    <h3 class="event-title">{{ event.Title }}</h3>
-                                    <div class="event-details">
-                                        <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
-                                        <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
-                                        <p><strong>Location:</strong> {{ event.Location }}</p>
-                                        <p><a href="{{ event.URL }}">More Info</a></p>
-                                    </div>
+                                    <p><strong>Title:</strong> {{ event["Title"] }}</p>
+                                    <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
+                                    <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
+                                    <p><strong>Category ID:</strong> {{ event["Category ID"] }}</p>
+                                    <form method="post" action="/process_form">
+                                        <input type="hidden" name="category_number" value="{{ event["Category ID"] }}">
+                                        <input type="hidden" name="start_date" value="{{ event["Start Date"] }}">
+                                        <input type="hidden" name="end_date" value="{{ event["End Date"] }}">
+                                        <label for="viewSelect">Select Layout:&nbsp;</label>
+                                        <select id="viewSelect" name="view" style="font-size: 8pt">
+                                            <option value="generic.html" selected>Generic Notice Layout</option>
+                                            <option value="daa.html">DAA Notice Layout</option>
+                                            <option value="dbs.html">DBS Notice Layout</option>
+                                            <option value="dcs.html">DCS Notice Layout</option>
+                                            <option value="dcmp.html">DCMP Notice Layout</option>
+                                            <option value="dhep.html">DHEP Notice Layout</option>
+                                            <option value="dnap.html">DNAP Notice Layout</option>
+                                            <option value="dtp.html">DTP Notice Layout</option>
+                                            <option value="stcs.html">STCS Notice Layout</option>
+                                            <option value="wednesdaytalks.html">Wednesday Colloquium Notice Layout</option>
+                                            <option value="aset.html">ASET Colloquium Notice Layout</option>
+                                            <option value="testDAA.html">Demo Notice Layout</option>
+                                        </select>
+                                        <button type="submit">Print Details</button>
+                                    </form>
                                 </li>
                             {% endfor %}
                         </ul>
                     {% else %}
-                        
+                        <p>No conference events available.</p>
                     {% endif %}
                 </div>
                 <div class="vertical-line"></div>
                 <div class="column">
-                    <h2>Seminars</h2>
+                    <h2>Upcoming Seminars</h2>
                     {% if seminar_events %}
                         <ul>
                             {% for event in seminar_events %}
                                 <li>
                                     <h3 class="event-title">{{ event.Title }}</h3>
                                     <div class="event-details">
-                                        <h2>No Seminars </h2>
                                         <p><strong>Start Date:</strong> {{ event["Start Date"] }}</p>
                                         <p><strong>End Date:</strong> {{ event["End Date"] }}</p>
                                         <p><strong>Location:</strong> {{ event.Location }}</p>
+                                        <p><strong>Category Number:</strong> {{ event["category_number"] }}</p>
                                         <p><strong>Description:</strong> {{ event.Description }}</p>
                                         <p><a href="{{ event.URL }}">More Info</a></p>
                                     </div>
                                 </li>
                             {% endfor %}
                         </ul>
+                        
                     {% else %}
-                       
+                        <h2>No Seminars Available</h2>
                     {% endif %}
+                    </br>
                 </div>
             </div>
-        </div>
-    </div>
-</div>
-</body>
-</html>
+        </body>
+        </html>
